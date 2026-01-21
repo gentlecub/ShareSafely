@@ -1,0 +1,81 @@
+# ===========================================
+# .NET / ASP.NET Core
+# ===========================================
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.user
+*.userosscache
+*.suo
+*.cache
+*.log
+
+# ===========================================
+# IDE - Visual Studio / VS Code / Rider
+# ===========================================
+.vs/
+*.sln.docstates
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# ===========================================
+# User-specific files
+# ===========================================
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ===========================================
+# NuGet
+# ===========================================
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+# ===========================================
+# Azure
+# ===========================================
+publish/
+*.azurePubxml
+*.pubxml
+*.publishproj
+
+# ===========================================
+# Secretos locales (NUNCA commitear)
+# ===========================================
+appsettings.Development.json
+appsettings.Local.json
+*.local.json
+secrets.json
+local.settings.json
+
+# ===========================================
+# Logs y temporales
+# ===========================================
+*.log
+*.tmp
+*.temp
+logs/
+
+# ===========================================
+# OS Generated
+# ===========================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===========================================
+# Node (si usas frontend React)
+# ===========================================
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.*.local
