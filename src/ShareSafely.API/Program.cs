@@ -1,6 +1,6 @@
 using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
-using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.EntityFrameworkCore;
+using ShareSafely.API.Data;
 using ShareSafely.API.Services;
 using ShareSafely.API.Services.Interfaces;
 
@@ -44,10 +44,9 @@ builder.Services.AddSwaggerGen(c =>
 // ============================================================
 // INYECCIÓN DE DEPENDENCIAS - SERVICIOS DE LA APLICACIÓN
 // ============================================================
-// TODO: Registrar los servicios cuando se implementen:
-// builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
-// builder.Services.AddScoped<ISasLinkService, SasLinkService>();
-// builder.Services.AddScoped<IFileMetadataService, FileMetadataService>();
+builder.Services.AddScoped<IFileMetadataService, FileMetadataService>();
+builder.Services.AddScoped<IFileStorageService, AzureBlobStorageService>();
+builder.Services.AddScoped<ISasLinkService, SasLinkService>();
 
 // ============================================================
 // CONFIGURACIÓN DE APPLICATION INSIGHTS (MONITOREO)
@@ -72,10 +71,9 @@ builder.Services.AddCors(options =>
 // ============================================================
 // CONFIGURACIÓN DE BASE DE DATOS
 // ============================================================
-// TODO: Configurar Entity Framework cuando se implemente el módulo de BD
-// var connectionString = builder.Configuration["DatabaseConnectionString"];
-// builder.Services.AddDbContext<AppDbContext>(options =>
-//     options.UseSqlServer(connectionString));
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 
