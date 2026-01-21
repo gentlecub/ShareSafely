@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <!-- ============================================================ -->
+  <!-- Paquetes de Testing                                          -->
+  <!-- ============================================================ -->
+  <ItemGroup>
+    <!-- xUnit - Framework de testing -->
+    <PackageReference Include="xunit" Version="2.6.6" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+
+    <!-- Microsoft Test SDK -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+
+    <!-- Moq - Mocking de dependencias -->
+    <PackageReference Include="Moq" Version="4.20.70" />
+
+    <!-- FluentAssertions - Assertions legibles -->
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+
+    <!-- Coverlet - Cobertura de código -->
+    <PackageReference Include="coverlet.collector" Version="6.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+
+    <!-- Entity Framework InMemory para tests de BD -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.1" />
+  </ItemGroup>
+
+  <!-- ============================================================ -->
+  <!-- Referencia al proyecto principal                             -->
+  <!-- ============================================================ -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ShareSafely.API\ShareSafely.API.csproj" />
+  </ItemGroup>
+
+</Project>

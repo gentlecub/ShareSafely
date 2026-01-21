@@ -1,0 +1,101 @@
+# ============================================================
+# ShareSafely - CI/CD Pipeline
+# ============================================================
+# Ejecuta: build, tests, y deploy
+# ============================================================
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  AZURE_WEBAPP_NAME: sharesafely-api
+
+jobs:
+  # ──────────────────────────────────────────────────────────
+  # Job 1: Build y Test
+  # ──────────────────────────────────────────────────────────
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restaurar dependencias
+        run: dotnet restore src/ShareSafely.API/ShareSafely.API.csproj
+
+      - name: Build
+        run: dotnet build src/ShareSafely.API/ShareSafely.API.csproj --configuration Release --no-restore
+
+      - name: Ejecutar Tests
+        run: |
+          dotnet test tests/ShareSafely.API.Tests/ShareSafely.API.Tests.csproj \
+            --configuration Release \
+            --no-build \
+            --verbosity normal \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./coverage
+
+      - name: Publicar resultados de coverage
+        uses: codecov/codecov-action@v3
+        if: success()
+        with:
+          files: ./coverage/**/coverage.cobertura.xml
+          fail_ci_if_error: false
+
+      - name: Publicar artefactos
+        if: github.ref == 'refs/heads/main'
+        run: |
+          dotnet publish src/ShareSafely.API/ShareSafely.API.csproj \
+            --configuration Release \
+            --output ./publish
+
+      - name: Upload artefactos
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-publish
+          path: ./publish
+
+  # ──────────────────────────────────────────────────────────
+  # Job 2: Deploy a Azure (solo en main)
+  # ──────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to Azure
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Download artefactos
+        uses: actions/download-artifact@v4
+        with:
+          name: api-publish
+          path: ./publish
+
+      - name: Login a Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy a Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: ./publish
+
+      - name: Logout de Azure
+        run: az logout
+        if: always()
