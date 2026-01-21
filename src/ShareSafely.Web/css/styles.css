@@ -1,0 +1,220 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: 100vh;
+    color: #fff;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #4ecca3;
+}
+
+header p {
+    color: #a0a0a0;
+}
+
+/* Drop Zone */
+.drop-zone {
+    border: 2px dashed #4ecca3;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: rgba(78, 204, 163, 0.05);
+    cursor: pointer;
+}
+
+.drop-zone:hover,
+.drop-zone.dragover {
+    border-color: #45b393;
+    background: rgba(78, 204, 163, 0.15);
+}
+
+.drop-zone .icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.drop-zone .small {
+    color: #666;
+    margin: 10px 0;
+}
+
+/* Botones */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #4ecca3;
+    color: #1a1a2e;
+}
+
+.btn-primary:hover {
+    background: #45b393;
+}
+
+.btn-success {
+    background: #4ecca3;
+    color: #1a1a2e;
+    width: 100%;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+.btn-success:disabled {
+    background: #2a2a3e;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: #3a3a5e;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background: #4a4a6e;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid #4ecca3;
+    color: #4ecca3;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.btn-outline:hover {
+    background: rgba(78, 204, 163, 0.1);
+}
+
+/* Opciones */
+.options {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.options label {
+    color: #a0a0a0;
+}
+
+.options select {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #3a3a5e;
+    background: #2a2a3e;
+    color: #fff;
+    flex: 1;
+}
+
+/* Progreso */
+.progress-container {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #2a2a3e;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #4ecca3;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* Resultado */
+.result-section {
+    margin-top: 30px;
+    padding: 25px;
+    background: rgba(78, 204, 163, 0.1);
+    border-radius: 12px;
+    border: 1px solid #4ecca3;
+}
+
+.result-section h2 {
+    margin-bottom: 15px;
+    color: #4ecca3;
+}
+
+.link-container {
+    display: flex;
+    gap: 10px;
+}
+
+.link-container input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #3a3a5e;
+    background: #1a1a2e;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.expiry-info {
+    margin-top: 15px;
+    color: #a0a0a0;
+    font-size: 0.9rem;
+}
+
+/* Error */
+.error-message {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 82, 82, 0.1);
+    border: 1px solid #ff5252;
+    border-radius: 8px;
+    color: #ff5252;
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+
+footer {
+    margin-top: 40px;
+    text-align: center;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+footer p {
+    margin: 5px 0;
+}
