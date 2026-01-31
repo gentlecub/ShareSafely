@@ -76,10 +76,12 @@ desktop.ini
 node_modules/
 dist/
 build/
+audits/
 
 # ===========================================
 # Docker
 # ===========================================
+.vscode
 .env
 .env.local
 .env.*.local

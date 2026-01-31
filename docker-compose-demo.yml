@@ -1,0 +1,119 @@
+# ============================================================
+# ShareSafely - Docker Compose DEMO (con Azurite)
+# ============================================================
+# Ejecutar: docker-compose -f docker-compose-demo.yml up --build
+# ============================================================
+
+version: '3.8'
+
+services:
+  # ──────────────────────────────────────────────────────────
+  # Azurite - Emulador de Azure Storage
+  # ──────────────────────────────────────────────────────────
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: sharesafely-azurite
+    command: "azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --loose"
+    ports:
+      - "10000:10000"  # Blob
+      - "10001:10001"  # Queue
+      - "10002:10002"  # Table
+    volumes:
+      - azurite-data:/data
+    networks:
+      - sharesafely-network
+    healthcheck:
+      test: nc -z localhost 10000 || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # ──────────────────────────────────────────────────────────
+  # Base de datos SQL Server
+  # ──────────────────────────────────────────────────────────
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sharesafely-db
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Demo@Password123!
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+    networks:
+      - sharesafely-network
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Demo@Password123!" -C -Q "SELECT 1" || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ──────────────────────────────────────────────────────────
+  # Backend API ASP.NET Core
+  # ──────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    container_name: sharesafely-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=ShareSafelyDB;User Id=sa;Password=Demo@Password123!;TrustServerCertificate=True;
+      - AzureStorage__ConnectionString=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
+      - AzureStorage__ContainerName=archivos
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+      azurite:
+        condition: service_healthy
+    networks:
+      - sharesafely-network
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5000/health || exit 1
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+
+  # ──────────────────────────────────────────────────────────
+  # Frontend Nginx
+  # ──────────────────────────────────────────────────────────
+  web:
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile
+    container_name: sharesafely-web
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - sharesafely-network
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+# ──────────────────────────────────────────────────────────
+# Redes
+# ──────────────────────────────────────────────────────────
+networks:
+  sharesafely-network:
+    driver: bridge
+
+# ──────────────────────────────────────────────────────────
+# Volúmenes para persistencia
+# ──────────────────────────────────────────────────────────
+volumes:
+  sqldata:
+    driver: local
+  azurite-data:
+    driver: local

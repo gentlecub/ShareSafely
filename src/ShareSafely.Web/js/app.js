@@ -1,5 +1,9 @@
 // Configuración
-const API_URL = 'https://localhost:7001/api';
+// En Docker, usa '/api' porque nginx hace proxy
+// En desarrollo local, usa 'https://localhost:7001/api'
+const API_URL = window.location.hostname === 'localhost' && window.location.port === ''
+    ? '/api'
+    : (window.location.protocol + '//' + window.location.host + '/api');
 
 // Elementos del DOM
 const dropZone = document.getElementById('dropZone');

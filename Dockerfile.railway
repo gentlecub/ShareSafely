@@ -1,0 +1,46 @@
+# ============================================================
+# ShareSafely - Dockerfile para Railway (All-in-one)
+# ============================================================
+
+# Stage 1: Build API
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY src/ShareSafely.API/ShareSafely.API.csproj ./ShareSafely.API/
+RUN dotnet restore ./ShareSafely.API/ShareSafely.API.csproj
+
+COPY src/ShareSafely.API/ ./ShareSafely.API/
+WORKDIR /src/ShareSafely.API
+RUN dotnet publish -c Release -o /app/publish --no-restore
+
+# Stage 2: Runtime con Nginx para frontend
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+
+# Instalar nginx y supervisor
+RUN apt-get update && apt-get install -y nginx supervisor && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copiar API
+COPY --from=build /app/publish .
+
+# Copiar Frontend
+COPY src/ShareSafely.Web/ /var/www/html/
+
+# Configuración de Nginx
+RUN rm /etc/nginx/sites-enabled/default
+COPY docker/railway/nginx.conf /etc/nginx/sites-enabled/default
+
+# Configuración de Supervisor
+COPY docker/railway/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Puerto de Railway
+ENV PORT=8080
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Iniciar con supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

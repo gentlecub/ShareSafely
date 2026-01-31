@@ -27,4 +27,14 @@ public interface IFileMetadataService
     /// Registra un acceso en el log
     /// </summary>
     Task LogAccessAsync(Guid archivoId, TipoAccion accion, string? ip = null);
+
+    /// <summary>
+    /// Crea un nuevo registro de archivo
+    /// </summary>
+    Task<Archivo> CreateAsync(Archivo archivo);
+
+    /// <summary>
+    /// Elimina un registro de archivo
+    /// </summary>
+    Task<bool> DeleteAsync(Guid id);
 }
