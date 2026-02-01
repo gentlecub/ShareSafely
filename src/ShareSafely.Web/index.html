@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShareSafely - Comparte archivos de forma segura</title>
+    <title>ShareSafely - Share files securely</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>ShareSafely</h1>
-            <p>Comparte archivos de forma segura con enlaces temporales</p>
+            <p>Share files securely with temporary links</p>
         </header>
 
         <main>
@@ -19,10 +19,10 @@
                 <div id="dropZone" class="drop-zone">
                     <div class="drop-zone-content">
                         <span class="icon">📁</span>
-                        <p>Arrastra tu archivo aquí</p>
+                        <p>Drag your file here</p>
                         <p class="small">o</p>
                         <label class="btn btn-primary">
-                            Seleccionar archivo
+                            Select file
                             <input type="file" id="fileInput" hidden>
                         </label>
                     </div>
@@ -30,18 +30,18 @@
 
                 <!-- Opciones de expiración -->
                 <div class="options">
-                    <label for="expiration">Expiración del enlace:</label>
+                    <label for="expiration">Link Expiration:</label>
                     <select id="expiration">
-                        <option value="30">30 minutos</option>
-                        <option value="60" selected>1 hora</option>
-                        <option value="360">6 horas</option>
-                        <option value="1440">24 horas</option>
+                        <option value="30">30 minutes</option>
+                        <option value="60" selected>1 hour</option>
+                        <option value="360">6 hours</option>
+                        <option value="1440">24 hours</option>
                     </select>
                 </div>
 
                 <!-- Botón de subida -->
                 <button id="uploadBtn" class="btn btn-success" disabled>
-                    Subir archivo
+                    Upload file
                 </button>
 
                 <!-- Barra de progreso -->
@@ -55,16 +55,16 @@
 
             <!-- Resultado -->
             <section id="resultSection" class="result-section hidden">
-                <h2>Enlace generado</h2>
+                <h2>Generated link</h2>
                 <div class="link-container">
                     <input type="text" id="linkOutput" readonly>
-                    <button id="copyBtn" class="btn btn-secondary">Copiar</button>
+                    <button id="copyBtn" class="btn btn-secondary">Copy</button>
                 </div>
                 <p class="expiry-info">
-                    Expira: <span id="expiryDate"></span>
+                    Expires: <span id="expiryDate"></span>
                 </p>
                 <button id="newUploadBtn" class="btn btn-outline">
-                    Subir otro archivo
+                   Upload another file
                 </button>
             </section>
 
@@ -73,8 +73,8 @@
         </main>
 
         <footer>
-            <p>Archivos permitidos: PDF, DOCX, XLSX, PNG, JPG, ZIP</p>
-            <p>Tamaño máximo: 100 MB</p>
+            <p>Allowed files: PDF, DOCX, XLSX, PNG, JPG, ZIP</p>
+            <p>Maximum size: 100 MB</p>
         </footer>
     </div>
 

@@ -41,8 +41,11 @@ dropZone.addEventListener('drop', (e) => {
     }
 });
 
-dropZone.addEventListener('click', () => {
-    fileInput.click();
+dropZone.addEventListener('click', (e) => {
+    // Evitar que se abra el diálogo dos veces si el clic viene del input
+    if (e.target !== fileInput) {
+        fileInput.click();
+    }
 });
 
 fileInput.addEventListener('change', (e) => {
@@ -59,12 +62,12 @@ function handleFileSelect(file) {
     const ext = '.' + file.name.split('.').pop().toLowerCase();
 
     if (!allowedTypes.includes(ext)) {
-        showError(`Tipo de archivo no permitido: ${ext}`);
+        showError(`Unallowed file type: ${ext}`);
         return;
     }
 
     if (file.size > maxSize) {
-        showError('El archivo excede el límite de 100MB');
+        showError('The file exceeds the 100MB limit');
         return;
     }
 
@@ -99,7 +102,7 @@ uploadBtn.addEventListener('click', async () => {
         showResult(linkResponse.data);
 
     } catch (error) {
-        showError(error.message || 'Error al subir el archivo');
+        showError(error.message || 'Error uploading file');
         resetUpload();
     }
 });
@@ -126,12 +129,12 @@ async function uploadFile(file) {
                 resolve(JSON.parse(xhr.responseText));
             } else {
                 const error = JSON.parse(xhr.responseText);
-                reject(new Error(error.message || 'Error en la subida'));
+                reject(new Error(error.message || 'Upload error'));
             }
         });
 
         xhr.addEventListener('error', () => {
-            reject(new Error('Error de conexión'));
+            reject(new Error('Connection error'));
         });
 
         xhr.open('POST', `${API_URL}/files/upload`);
@@ -151,7 +154,7 @@ async function generateLink(archivoId, expiracionMinutos) {
 
     if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Error al generar enlace');
+        throw new Error(error.message || 'Error generating link');
     }
 
     return response.json();
@@ -194,7 +197,7 @@ function resetUpload() {
     progressContainer.classList.add('hidden');
     progressFill.style.width = '0%';
     progressText.textContent = '0%';
-    dropZone.querySelector('p').textContent = 'Arrastra tu archivo aquí';
+    dropZone.querySelector('p').textContent = 'Drag your file here';
     dropZone.querySelector('.icon').textContent = '📁';
 }
 
