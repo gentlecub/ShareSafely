@@ -157,7 +157,14 @@ var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrEmpty(databaseUrl) && databaseProvider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase))
 {
     connectionString = ConvertPostgresUrl(databaseUrl);
-    Console.WriteLine("Using DATABASE_URL from environment");
+    Console.WriteLine($"[DB] Using DATABASE_URL from environment");
+    Console.WriteLine($"[DB] Provider: {databaseProvider}");
+}
+else
+{
+    Console.WriteLine($"[DB] DATABASE_URL not found or not using PostgreSQL");
+    Console.WriteLine($"[DB] Provider: {databaseProvider}");
+    Console.WriteLine($"[DB] ConnectionString configured: {!string.IsNullOrEmpty(connectionString)}");
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -189,8 +196,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // ============================================================
 // CONFIGURACIÓN DE HEALTH CHECKS
 // ============================================================
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<AppDbContext>("database");
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -202,15 +208,36 @@ var app = builder.Build();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-    try
+    // Retry logic for database initialization
+    var maxRetries = 5;
+    for (int i = 0; i < maxRetries; i++)
     {
-        logger.LogInformation("Ensuring database is created...");
-        db.Database.EnsureCreated();
-        logger.LogInformation("Database ready");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error initializing database - will retry on first request");
+        try
+        {
+            logger.LogInformation("[DB] Attempt {Attempt}/{Max} - Connecting to database...", i + 1, maxRetries);
+
+            if (db.Database.CanConnect())
+            {
+                logger.LogInformation("[DB] Connection successful, ensuring schema...");
+                db.Database.EnsureCreated();
+                logger.LogInformation("[DB] Database ready!");
+                break;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("[DB] Attempt {Attempt} failed: {Message}", i + 1, ex.Message);
+
+            if (i < maxRetries - 1)
+            {
+                logger.LogInformation("[DB] Retrying in 3 seconds...");
+                Thread.Sleep(3000);
+            }
+            else
+            {
+                logger.LogError(ex, "[DB] All connection attempts failed");
+            }
+        }
     }
 }
 
@@ -225,7 +252,12 @@ app.UseGlobalExceptionHandler();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+// Skip HTTPS redirect in production (Railway handles SSL at proxy level)
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseCors("AllowFrontend");
 
 // Authentication & Authorization

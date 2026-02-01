@@ -2,22 +2,26 @@
 # ShareSafely - Dockerfile para Railway (All-in-one)
 # ============================================================
 
-# Stage 1: Build API
+# Stage 1: Build API (only API project, skip tests and functions)
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
+# Copy only API project file
 COPY src/ShareSafely.API/ShareSafely.API.csproj ./ShareSafely.API/
 RUN dotnet restore ./ShareSafely.API/ShareSafely.API.csproj
 
+# Copy API source code
 COPY src/ShareSafely.API/ ./ShareSafely.API/
+
+# Build and publish
 WORKDIR /src/ShareSafely.API
-RUN dotnet publish -c Release -o /app/publish --no-restore
+RUN dotnet publish -c Release -o /app/publish
 
 # Stage 2: Runtime con Nginx para frontend
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 
-# Instalar nginx y supervisor
-RUN apt-get update && apt-get install -y nginx supervisor && rm -rf /var/lib/apt/lists/*
+# Instalar nginx, supervisor y curl
+RUN apt-get update && apt-get install -y nginx supervisor curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
