@@ -152,19 +152,43 @@ builder.Services.AddCors(options =>
 var databaseProvider = builder.Configuration["Database:Provider"] ?? "SqlServer";
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Railway provides DATABASE_URL in postgres:// format - convert to Npgsql format
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-if (!string.IsNullOrEmpty(databaseUrl) && databaseProvider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase))
+// Railway PostgreSQL connection - try multiple formats
+Console.WriteLine($"[DB] Provider configured: {databaseProvider}");
+
+if (databaseProvider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase))
 {
-    connectionString = ConvertPostgresUrl(databaseUrl);
-    Console.WriteLine($"[DB] Using DATABASE_URL from environment");
-    Console.WriteLine($"[DB] Provider: {databaseProvider}");
+    // Try DATABASE_URL first (Railway standard)
+    var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+    // Try individual PostgreSQL variables (Railway alternative)
+    var pgHost = Environment.GetEnvironmentVariable("PGHOST");
+    var pgPort = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
+    var pgDatabase = Environment.GetEnvironmentVariable("PGDATABASE");
+    var pgUser = Environment.GetEnvironmentVariable("PGUSER");
+    var pgPassword = Environment.GetEnvironmentVariable("PGPASSWORD");
+
+    Console.WriteLine($"[DB] DATABASE_URL present: {!string.IsNullOrEmpty(databaseUrl)}");
+    Console.WriteLine($"[DB] PGHOST present: {!string.IsNullOrEmpty(pgHost)}");
+
+    if (!string.IsNullOrEmpty(databaseUrl))
+    {
+        connectionString = ConvertPostgresUrl(databaseUrl);
+        Console.WriteLine($"[DB] Using DATABASE_URL");
+    }
+    else if (!string.IsNullOrEmpty(pgHost))
+    {
+        connectionString = $"Host={pgHost};Port={pgPort};Database={pgDatabase};Username={pgUser};Password={pgPassword};SSL Mode=Require;Trust Server Certificate=true";
+        Console.WriteLine($"[DB] Using PG* variables - Host: {pgHost}");
+    }
+    else
+    {
+        Console.WriteLine($"[DB] No Railway PostgreSQL variables found, using appsettings");
+        Console.WriteLine($"[DB] ConnectionString from config: {!string.IsNullOrEmpty(connectionString)}");
+    }
 }
 else
 {
-    Console.WriteLine($"[DB] DATABASE_URL not found or not using PostgreSQL");
-    Console.WriteLine($"[DB] Provider: {databaseProvider}");
-    Console.WriteLine($"[DB] ConnectionString configured: {!string.IsNullOrEmpty(connectionString)}");
+    Console.WriteLine($"[DB] Using SQL Server");
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
