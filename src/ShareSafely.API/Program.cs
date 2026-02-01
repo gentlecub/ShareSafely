@@ -149,8 +149,16 @@ builder.Services.AddCors(options =>
 // ============================================================
 // CONFIGURACIÓN DE BASE DE DATOS (SQL Server o PostgreSQL)
 // ============================================================
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 var databaseProvider = builder.Configuration["Database:Provider"] ?? "SqlServer";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Railway provides DATABASE_URL in postgres:// format - convert to Npgsql format
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+if (!string.IsNullOrEmpty(databaseUrl) && databaseProvider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase))
+{
+    connectionString = ConvertPostgresUrl(databaseUrl);
+    Console.WriteLine("Using DATABASE_URL from environment");
+}
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -240,3 +248,22 @@ app.MapGet("/", () => Results.Ok(new
 })).AllowAnonymous();
 
 app.Run();
+
+// ============================================================
+// HELPER: Convert Railway DATABASE_URL to Npgsql format
+// ============================================================
+static string ConvertPostgresUrl(string databaseUrl)
+{
+    // Railway format: postgresql://user:password@host:port/database
+    // Npgsql format: Host=host;Port=port;Database=database;Username=user;Password=password
+
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':');
+    var username = userInfo[0];
+    var password = userInfo.Length > 1 ? userInfo[1] : "";
+    var host = uri.Host;
+    var port = uri.Port > 0 ? uri.Port : 5432;
+    var database = uri.AbsolutePath.TrimStart('/');
+
+    return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+}
