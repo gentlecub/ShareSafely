@@ -10,16 +10,20 @@ using ShareSafely.API.Services.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 
 // ============================================================
-// CONFIGURACIÓN DE AZURE KEY VAULT
+// CONFIGURACIÓN DE AZURE KEY VAULT (solo si está configurado)
 // ============================================================
-if (!builder.Environment.IsDevelopment())
+var keyVaultUrl = builder.Configuration["KeyVault:Url"];
+if (!string.IsNullOrEmpty(keyVaultUrl) &&
+    !keyVaultUrl.Contains("<") &&
+    Uri.TryCreate(keyVaultUrl, UriKind.Absolute, out var keyVaultUri))
 {
-    var keyVaultUrl = builder.Configuration["KeyVault:Url"];
-    if (!string.IsNullOrEmpty(keyVaultUrl))
+    try
     {
-        builder.Configuration.AddAzureKeyVault(
-            new Uri(keyVaultUrl),
-            new DefaultAzureCredential());
+        builder.Configuration.AddAzureKeyVault(keyVaultUri, new DefaultAzureCredential());
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Warning: Could not connect to Key Vault: {ex.Message}");
     }
 }
 
