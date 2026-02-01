@@ -38,13 +38,13 @@ COPY docker/railway/nginx.conf /etc/nginx/sites-enabled/default
 # Configuración de Supervisor
 COPY docker/railway/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Puerto de Railway
+# Script de inicio
+COPY docker/railway/start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Puerto de Railway (se configura dinámicamente)
 ENV PORT=8080
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
-
-# Iniciar con supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Iniciar con script
+CMD ["/start.sh"]
