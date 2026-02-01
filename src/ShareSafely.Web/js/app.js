@@ -42,10 +42,13 @@ dropZone.addEventListener('drop', (e) => {
 });
 
 dropZone.addEventListener('click', (e) => {
-    // Evitar que se abra el diálogo dos veces si el clic viene del input
-    if (e.target !== fileInput) {
-        fileInput.click();
+    // Evitar que se abra el diálogo dos veces si el clic viene del label o del input
+    // El label ya activa el input automáticamente por comportamiento nativo
+    const clickedLabel = e.target.closest('label');
+    if (e.target === fileInput || clickedLabel) {
+        return;
     }
+    fileInput.click();
 });
 
 fileInput.addEventListener('change', (e) => {
