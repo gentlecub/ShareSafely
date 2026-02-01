@@ -289,13 +289,26 @@ static string ConvertPostgresUrl(string databaseUrl)
     // Railway format: postgresql://user:password@host:port/database
     // Npgsql format: Host=host;Port=port;Database=database;Username=user;Password=password
 
-    var uri = new Uri(databaseUrl);
-    var userInfo = uri.UserInfo.Split(':');
-    var username = userInfo[0];
-    var password = userInfo.Length > 1 ? userInfo[1] : "";
-    var host = uri.Host;
-    var port = uri.Port > 0 ? uri.Port : 5432;
-    var database = uri.AbsolutePath.TrimStart('/');
+    try
+    {
+        var uri = new Uri(databaseUrl);
+        var userInfo = uri.UserInfo.Split(':');
+        var username = Uri.UnescapeDataString(userInfo[0]);
+        var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
+        var host = uri.Host;
+        var port = uri.Port > 0 ? uri.Port : 5432;
+        var database = uri.AbsolutePath.TrimStart('/');
 
-    return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+        var connStr = $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+
+        Console.WriteLine($"[DB] Converted connection - Host: {host}, Port: {port}, Database: {database}, User: {username}");
+
+        return connStr;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[DB] Error parsing DATABASE_URL: {ex.Message}");
+        Console.WriteLine($"[DB] Raw URL starts with: {databaseUrl.Substring(0, Math.Min(30, databaseUrl.Length))}...");
+        throw;
+    }
 }
