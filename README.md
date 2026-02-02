@@ -1,39 +1,39 @@
 # ShareSafely
 
-Plataforma de gestión de archivos en Azure con enlaces temporales seguros.
+File management platform on Azure with secure temporary links.
 
-## Descripcion
+## Description
 
-ShareSafely permite subir archivos a Azure Blob Storage y generar enlaces seguros con expiracion automatica. Los archivos se eliminan automaticamente cuando expiran.
+ShareSafely allows you to upload files to Azure Blob Storage and generate secure links with automatic expiration. Files are automatically deleted when they expire.
 
-## Caracteristicas
+## Features
 
-- Subida de archivos a Azure Blob Storage
-- Generacion de enlaces SAS con expiracion configurable
-- Validacion de tipo y tamanio de archivos
-- Limpieza automatica de archivos expirados
-- Secretos protegidos con Azure Key Vault
-- Monitoreo con Application Insights
+- File upload to Azure Blob Storage
+- SAS link generation with configurable expiration
+- File type and size validation
+- Automatic cleanup of expired files
+- Secrets protected with Azure Key Vault
+- Monitoring with Application Insights
 
-## Tecnologias
+## Technologies
 
-| Componente | Tecnologia |
-|------------|------------|
+| Component | Technology |
+|-----------|------------|
 | Backend | ASP.NET Core 8.0 |
 | Frontend | HTML/CSS/JavaScript |
-| Base de datos | Azure SQL Database |
-| Almacenamiento | Azure Blob Storage |
-| Secretos | Azure Key Vault |
-| Limpieza | Azure Functions |
+| Database | Azure SQL Database |
+| Storage | Azure Blob Storage |
+| Secrets | Azure Key Vault |
+| Cleanup | Azure Functions |
 | Hosting | Azure App Service |
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 ShareSafely/
-├── docs/                          # Documentacion de planificacion
+├── docs/                          # Planning documentation
 ├── scripts/
-│   ├── azure/                     # Scripts de infraestructura
+│   ├── azure/                     # Infrastructure scripts
 │   │   ├── 00-variables.sh
 │   │   ├── 01-resource-group.sh
 │   │   ├── 02-storage.sh
@@ -42,100 +42,100 @@ ShareSafely/
 │   │   ├── 05-app-service.sh
 │   │   ├── 06-function-app.sh
 │   │   └── deploy-all.sh
-│   └── database/                  # Scripts de migracion
+│   └── database/                  # Migration scripts
 │       ├── 01-create-tables.sql
 │       ├── 02-seed-data.sql
 │       └── run-migration.sh
 ├── src/
-│   ├── ShareSafely.API/           # Backend ASP.NET Core
+│   ├── ShareSafely.API/           # ASP.NET Core Backend
 │   ├── ShareSafely.Web/           # Frontend
 │   └── ShareSafely.Functions/     # Azure Function
 └── README.md
 ```
 
-## Requisitos Previos
+## Prerequisites
 
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli)
 - [Azure Functions Core Tools](https://docs.microsoft.com/azure/azure-functions/functions-run-local)
-- Suscripcion de Azure activa
+- Active Azure subscription
 
-## Instalacion Local
+## Local Installation
 
-### 1. Clonar el repositorio
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/gentlecub/ShareSafely.git
 cd ShareSafely
 ```
 
-### 2. Configurar appsettings.json
+### 2. Configure appsettings.json
 
-Editar `src/ShareSafely.API/appsettings.json`:
+Edit `src/ShareSafely.API/appsettings.json`:
 
 ```json
 {
   "AzureStorage": {
-    "ConnectionString": "<TU-CONNECTION-STRING>",
+    "ConnectionString": "<YOUR-CONNECTION-STRING>",
     "ContainerName": "archivos"
   },
   "ConnectionStrings": {
-    "DefaultConnection": "<TU-SQL-CONNECTION-STRING>"
+    "DefaultConnection": "<YOUR-SQL-CONNECTION-STRING>"
   }
 }
 ```
 
-### 3. Ejecutar migracion de base de datos
+### 3. Run database migration
 
 ```bash
-# Opcion 1: Azure Portal Query Editor
-# Copiar contenido de scripts/database/01-create-tables.sql
+# Option 1: Azure Portal Query Editor
+# Copy contents from scripts/database/01-create-tables.sql
 
-# Opcion 2: sqlcmd
+# Option 2: sqlcmd
 cd scripts/database
 ./run-migration.sh
 ```
 
-### 4. Ejecutar el backend
+### 4. Run the backend
 
 ```bash
 cd src/ShareSafely.API
 dotnet run
 ```
 
-La API estara disponible en: `https://localhost:7001`
+The API will be available at: `https://localhost:7001`
 
-### 5. Abrir el frontend
+### 5. Open the frontend
 
-Abrir `src/ShareSafely.Web/index.html` en el navegador.
+Open `src/ShareSafely.Web/index.html` in your browser.
 
-## Despliegue en Azure
+## Azure Deployment
 
-### 1. Configurar variables
+### 1. Configure variables
 
-Editar `scripts/azure/00-variables.sh` con tus valores:
+Edit `scripts/azure/00-variables.sh` with your values:
 
 ```bash
 PROJECT_NAME="sharesafely"
 LOCATION="eastus"
-SQL_ADMIN_PASSWORD="TuPasswordSeguro123!"
+SQL_ADMIN_PASSWORD="YourSecurePassword123!"
 ```
 
-### 2. Ejecutar despliegue completo
+### 2. Run complete deployment
 
 ```bash
 cd scripts/azure
 ./deploy-all.sh
 ```
 
-Esto creara:
+This will create:
 - Resource Group
 - Storage Account + Container
-- Key Vault + Secretos
+- Key Vault + Secrets
 - SQL Server + Database
 - App Service
 
-### 3. Desplegar la aplicacion
+### 3. Deploy the application
 
 ```bash
 cd src/ShareSafely.API
@@ -145,7 +145,7 @@ zip -r ../publish.zip .
 az webapp deploy --name sharesafely-api --src-path ../publish.zip
 ```
 
-### 4. Desplegar Azure Function
+### 4. Deploy Azure Function
 
 ```bash
 cd src/ShareSafely.Functions
@@ -154,39 +154,39 @@ func azure functionapp publish sharesafely-cleanup
 
 ## API Endpoints
 
-| Metodo | Endpoint | Descripcion |
+| Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/files/upload` | Subir archivo |
-| GET | `/api/files/{id}` | Obtener info del archivo |
-| DELETE | `/api/files/{id}` | Eliminar archivo |
-| POST | `/api/links/generate` | Generar enlace SAS |
-| GET | `/api/links/download/{token}` | Descargar archivo |
-| DELETE | `/api/links/{id}` | Revocar enlace |
+| POST | `/api/files/upload` | Upload file |
+| GET | `/api/files/{id}` | Get file info |
+| DELETE | `/api/files/{id}` | Delete file |
+| POST | `/api/links/generate` | Generate SAS link |
+| GET | `/api/links/download/{token}` | Download file |
+| DELETE | `/api/links/{id}` | Revoke link |
 | GET | `/health` | Health check |
 
-## Ejemplo de Uso
+## Usage Example
 
-### Subir archivo
+### Upload file
 
 ```bash
 curl -X POST https://localhost:7001/api/files/upload \
-  -F "archivo=@documento.pdf" \
+  -F "archivo=@document.pdf" \
   -F "expiracionMinutos=60"
 ```
 
-### Generar enlace
+### Generate link
 
 ```bash
 curl -X POST https://localhost:7001/api/links/generate \
   -H "Content-Type: application/json" \
-  -d '{"archivoId": "guid-del-archivo", "expiracionMinutos": 60}'
+  -d '{"archivoId": "file-guid", "expiracionMinutos": 60}'
 ```
 
-## Configuracion
+## Configuration
 
-### Archivos permitidos
+### Allowed files
 
-Editar en `appsettings.json`:
+Edit in `appsettings.json`:
 
 ```json
 "FileValidation": {
@@ -195,7 +195,7 @@ Editar en `appsettings.json`:
 }
 ```
 
-### Expiracion de enlaces
+### Link expiration
 
 ```json
 "SasLink": {
@@ -204,14 +204,14 @@ Editar en `appsettings.json`:
 }
 ```
 
-## Seguridad
+## Security
 
-- Todos los secretos en Azure Key Vault
-- Enlaces SAS con permisos de solo lectura
-- HTTPS obligatorio
-- Validacion de tipo y tamanio de archivos
-- Sin acceso publico al Blob Storage
+- All secrets stored in Azure Key Vault
+- SAS links with read-only permissions
+- HTTPS required
+- File type and size validation
+- No public access to Blob Storage
 
-## Licencia
+## License
 
 MIT License
